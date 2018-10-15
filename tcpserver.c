@@ -18,11 +18,35 @@
 
 #define SERV_TCP_PORT 3636
 
-    int savings = 10;
-    int checkings = 0;
+    int savings = 100;
+    int checkings = 100;
+int convertToInt(char num[20]){
+    /*
+    This converts any string of length 20 to an int.
+    */
+    int dec = 0, i, j, len;
+    len = strlen(num);
+	for(i=0; i<len; i++){
+		dec = dec * 10 + ( num[i] - '0' );
+	}
+	return dec;
+}
 
-void checkBalance(char checkString[20]){
-    printf("%s\n",checkString);
+void depositCheck(char depositAmount[3][20]){
+    /*
+    This handles changing deposit amounts. It first calculates the int by calling convertToInt() then it adds this
+    amount to either the checkings or the savings depending on the second portion of the string.
+    */
+    int quantity = convertToInt(depositAmount[2]);
+    printf("\nAmount Deposited: %d to %s",quantity,depositAmount[1]);
+    if (strncmp(depositAmount[1],"checkings",2)==0){
+        checkings +=quantity;
+	    printf("\nCheckings After: %d\n", checkings);
+    }
+    else if (strncmp(depositAmount[1],"savings",2)==0){
+        savings += quantity;
+	    printf("\nSavings After: %d\n", savings);
+    }
 }
 
 int main(void) {
@@ -123,10 +147,10 @@ int main(void) {
             printf("%s\n","Balance");
         }
         else if (strncmp(splitStrings[0],"Deposit",2)==0){
-            printf("%s\n","Deposit");
+            depositCheck(splitStrings);
         }
-        else if (strncmp(splitStrings[0],"Check",2)==0){
-            printf("%s\n","Check");
+        else if (strncmp(splitStrings[0],"Withdraw",2)==0){
+            printf("%s\n","Withdraw");
         }
         else if (strncmp(splitStrings[0],"Transfer",2)==0){
             printf("%s\n","Transfer");
