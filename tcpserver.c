@@ -18,8 +18,14 @@
 
 #define SERV_TCP_PORT 3636
 
-int main(void) {
+    int savings = 10;
+    int checkings = 0;
 
+void checkBalance(char checkString[20]){
+    printf("%s\n",checkString);
+}
+
+int main(void) {
    int sock_server;  /* Socket on which server listens to clients */
    int sock_connection;  /* Socket on which server exchanges data with client */
 
@@ -39,12 +45,10 @@ int main(void) {
    unsigned int i;  /* temporary loop variable */
 
    /* open a socket */
-
    if ((sock_server = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
       perror("Server: can't open stream socket");
       exit(1);                                                
    }
-
    /* initialize server address information */
     
    memset(&server_addr, 0, sizeof(server_addr));
@@ -92,12 +96,44 @@ int main(void) {
       /* receive the message */
 
       bytes_recd = recv(sock_connection, sentence, STRING_SIZE, 0);
-
       if (bytes_recd > 0){
          printf("Received Sentence is:\n");
          printf("%s", sentence);
          printf("\nwith length %d\n\n", bytes_recd);
-
+        //  printf("%c\n",sentence[0]);
+        char splitStrings[3][20]; //can store 10 words of 10 characters
+        int i;
+        int j;
+        int cnt;
+        // str = sentence;
+        j=0; 
+        cnt=0;
+        for(i=0;i<=(strlen(sentence));i++){
+            if(sentence[i]=='_'||sentence[i]=='\0'){
+                splitStrings[cnt][j]='\0';
+                cnt++; 
+                j=0; 
+            }
+            else{
+                splitStrings[cnt][j]=sentence[i];
+                j++;
+            }
+        }
+        if (strncmp(splitStrings[0],"Balance",2)==0){
+            printf("%s\n","Balance");
+        }
+        else if (strncmp(splitStrings[0],"Deposit",2)==0){
+            printf("%s\n","Deposit");
+        }
+        else if (strncmp(splitStrings[0],"Check",2)==0){
+            printf("%s\n","Check");
+        }
+        else if (strncmp(splitStrings[0],"Transfer",2)==0){
+            printf("%s\n","Transfer");
+        }
+        else{
+            printf("%s\n","Not an option buckaroo");
+        }
         /* prepare the message to send */
 
          msg_len = bytes_recd;

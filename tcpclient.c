@@ -27,7 +27,6 @@ int main(void) {
    char modifiedSentence[STRING_SIZE]; /* receive message */
    unsigned int msg_len;  /* length of message */                      
    int bytes_sent, bytes_recd; /* number of bytes sent or received */
-  
    /* open a socket */
 
    if ((sock_client = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
@@ -46,6 +45,7 @@ int main(void) {
 
    printf("Enter hostname of server: ");
    scanf("%s", server_hostname);
+
    if ((server_hp = gethostbyname(server_hostname)) == NULL) {
       perror("Client: invalid server hostname");
       close(sock_client);
@@ -61,7 +61,6 @@ int main(void) {
    memcpy((char *)&server_addr.sin_addr, server_hp->h_addr,
                                     server_hp->h_length);
    server_addr.sin_port = htons(server_port);
-
     /* connect to the server */
  		
    if (connect(sock_client, (struct sockaddr *) &server_addr, 
@@ -70,11 +69,12 @@ int main(void) {
       close(sock_client);
       exit(1);
    }
-  
+
    /* user interface */
 
    printf("Please input a sentence:\n");
    scanf("%s", sentence);
+   printf("%s",sentence);
    msg_len = strlen(sentence) + 1;
 
    /* send message */
