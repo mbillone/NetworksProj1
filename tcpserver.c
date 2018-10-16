@@ -79,12 +79,10 @@ void withdrawAmount(char depositAmount[3][20]){
 
 void checkBalance(char depositAmount[3][20]){
     if (strncmp(depositAmount[1],"checkings",2)==0){
-        printf("Balance of checkings account: ");
-        printf("%d", checkings);
+        printf("\nBalance of checkings account: %d",checkings);
     }
     else if (strncmp(depositAmount[1],"savings",2)==0){
-        printf("Balance of savings account: ");
-        printf("%d", savings);
+        printf("Balance of savings account: %d", savings);
     }
 }
 
@@ -200,7 +198,7 @@ int main(void) {
             }
         }
         if (strncmp(splitStrings[0],"Balance",2)==0){
-            printf("%s\n","Balance");
+            checkBalance(splitStrings);
         }
         else if (strncmp(splitStrings[0],"Deposit",2)==0){
             depositCheck(splitStrings);
