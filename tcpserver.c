@@ -31,6 +31,51 @@ int convertToInt(char num[20]){
 	}
 	return dec;
 }
+void transferAmount(char depositAmount[3][20]){
+    int quantity = convertToInt(depositAmount[2]);
+    printf("\nAmount to Transfer: %d from %s",quantity,depositAmount[1]);
+    if (strncmp(depositAmount[1],"checkingstosavings",2)==0){
+        if (quantity<=checkings){
+            checkings -= quantity;
+            savings+=quantity;
+	        printf("\nCheckings After: %d\n", checkings);
+	        printf("\nSavings After: %d\n", savings);
+        }
+        else{
+            printf("\nInsufficient Balance\n");
+        }
+    }
+    else if (strncmp(depositAmount[1],"savingstocheckings",2)==0){
+        if (quantity<=savings){
+            checkings += quantity;
+            savings-=quantity;
+	        printf("\nCheckings After: %d\n", checkings);
+	        printf("\nSavings After: %d\n", savings);
+        }
+        else{
+            printf("\nInsufficient Balance\n");
+        }
+    }
+}
+
+void withdrawAmount(char depositAmount[3][20]){
+    /*
+    */
+    int quantity = convertToInt(depositAmount[2]);
+    printf("\nAmount to Withdraw: %d from %s",quantity,depositAmount[1]);
+    if (strncmp(depositAmount[1],"checkings",2)==0){
+        if (quantity>checkings){
+            printf("\nInsufficient Balance\n");
+        }
+        else{
+            checkings-=quantity;
+	        printf("\nCheckings After: %d\n", checkings);
+        }
+    }
+    else if (strncmp(depositAmount[1],"savings",2)==0){
+        printf("\nPlease withdraw from checkings\n");
+    }
+}
 
 void depositCheck(char depositAmount[3][20]){
     /*
@@ -150,10 +195,10 @@ int main(void) {
             depositCheck(splitStrings);
         }
         else if (strncmp(splitStrings[0],"Withdraw",2)==0){
-            printf("%s\n","Withdraw");
+            withdrawAmount(splitStrings);
         }
         else if (strncmp(splitStrings[0],"Transfer",2)==0){
-            printf("%s\n","Transfer");
+            transferAmount(splitStrings);
         }
         else{
             printf("%s\n","Not an option buckaroo");
