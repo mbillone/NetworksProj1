@@ -32,6 +32,17 @@ int convertToInt(char num[20]){
 	return dec;
 }
 
+void checkBalance(char depositAmount[3][20]){
+    if (strncmp(depositAmount[1],"checkings",2)==0){
+        printf("Balance of checkings account: ");
+        printf("%d", checkings);
+    }
+    else if (strncmp(depositAmount[1],"savings",2)==0){
+        printf("Balance of savings account: ");
+        printf("%d", savings);
+    }
+}
+
 void depositCheck(char depositAmount[3][20]){
     /*
     This handles changing deposit amounts. It first calculates the int by calling convertToInt() then it adds this
