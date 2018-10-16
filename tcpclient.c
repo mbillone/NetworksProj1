@@ -17,6 +17,7 @@ char testing[2];
 char storeString[30];
 char sentence[STRING_SIZE];
 void createString(){
+    /*This is used for creating the transaction and for creating the account used.*/
     strncpy(testing, sentence, 2);
     strcat(storeString,sentence);
     strcat(storeString," ");
@@ -83,6 +84,10 @@ int main(void) {
    }
 
    /* user interface */
+   /* We did this in three questions. The first question, please answer one of the four indicated
+   transactions. In the second one, please specify savings for savings to checkings transfer, or
+   vice versa. The last question will show up for everything but balance, and handles the amount
+   to be utilized in the transaction*/
    printf("Please input a Transaction (Balance, Withdraw, Deposit, Transfer):\n");
    scanf("%s", sentence);
    createString();
@@ -107,15 +112,22 @@ int main(void) {
    msg_len = 13;
    /* send message */
    
-   printf("Sent to server: %s\n",input);
-   printf("Meaning: %s\n",storeString);
+   printf("Sent to server: %s\n",input); //What is sent to the server.
+   printf("Meaning: %s\n",storeString); //Readable for the user.
    bytes_sent = send(sock_client, input, msg_len, 0);
 
    /* get response from server */
   
    bytes_recd = recv(sock_client, modifiedSentence, STRING_SIZE, 0); 
-    char splitStrings[5][7]; //can store 10 words of 10 characters
+    //This is the response returned from the server. It is a character array of length 24 since
+    //this is the largest length that can be returned with how we did our messages. This is not
+    //the portion that is legible for the reader, just the simulation of the messages within the
+    //server and client.
+    printf("\nThe response from server is:\n");
     printf("%s\n",modifiedSentence);
+    //This handles breaking the returned sentence into a string of multiple commands, which will
+    //later be translated for user readability.
+    char splitStrings[5][7];
     int i;
     int j;
     int cnt;
@@ -131,6 +143,7 @@ int main(void) {
         }
     }
     char finalString[100];
+    //States the transaction type (Balance, Deposit, Withdraw, Transfer)
     if (strncmp(splitStrings[0],"Balance",2)==0){
         strcpy(finalString,"Transaction type = Balance\n");
     }
@@ -143,6 +156,8 @@ int main(void) {
     else if (strncmp(splitStrings[0],"Transfer",2)==0){
         strcpy(finalString,"Transaction type = Transfer\n");
     }
+    //If there is no error, it will skip this part. If there is, it translates the 
+    //two character error code into one that is legible 
     if (strncmp(splitStrings[1],"NA",2)!=0){
         if (strncmp(splitStrings[1],"IB",2)==0){
             strcat(finalString,"Error Code: Insufficient Balance\n");
@@ -154,12 +169,16 @@ int main(void) {
             strcat(finalString,"Error Code: Please only withdraw from checkings\n");
         }
     }
+    //This states whether the transaction was performed on checkings or savings.
     if (strncmp(splitStrings[2],"checkings",2)==0){
         strcat(finalString,"Transaction acted on checkings\n");
     }
     else if (strncmp(splitStrings[2],"savings",2)==0){
         strcat(finalString,"Transaction acted on savings\n");
     }
+    //The next bit handles adding the balance before and the balance after to the final string.
+    //It does this by concatinating the first portion of the sentence with the balance, then
+    //adding this to the final string
     char balance[25] = "Account Balance Before: ";
     strcat(balance,splitStrings[3]);
     strcat(finalString,balance);
@@ -167,7 +186,7 @@ int main(void) {
     char balancetwo[25] = "Account Balance After: ";
     strcat(balancetwo,splitStrings[4]);
     strcat(finalString,balancetwo);
-    printf("\nThe response from server is:\n");
+    printf("\nThe Transaction Summary:\n");
     printf("%s\n\n", finalString);
 
     /* close the socket */

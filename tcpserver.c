@@ -18,15 +18,15 @@
 
 #define SERV_TCP_PORT 3636
 
-int savings = 0;
-int checkings = 0;
+int savings = 0; //Total amount in savings at current moment
+int checkings = 0; //Total amount in checkings at current moment
 // int errorCode = -1;
-char errorCode[1];
-char balanceBefore[7];
-char balanceAfter[7];
-char returnString[24];
+char errorCode[1]; //If there is an error, the errorCode will be stored here as IB, MT, or SA.
+char balanceBefore[7]; //Balance before the current transaction
+char balanceAfter[7]; //Balance after the current transaction
+char returnString[24]; //String that will be returned by the server. 24 is the maximum largest size of this string.
 
-int convertToInt(char num[20]){
+int convertToInt(char num[13]){
     /*
     This converts any string of length 20 to an int.
     */
@@ -38,60 +38,72 @@ int convertToInt(char num[20]){
 	return dec;
 }
 
-void transferAmount(char depositAmount[3][20]){
-    int quantity = convertToInt(depositAmount[2]);
-    printf("Amount to Transfer: %d from %s\n",quantity,depositAmount[1]);
-    if (strncmp(depositAmount[1],"checkingstosavings",2)==0){
-            sprintf(balanceBefore,"%d",savings);
+void transferAmount(char transferQuant[3][13]){
+    /*Takes the money from one account and transfers it to the other one*/
+    int quantity = convertToInt(transferQuant[2]);
+    printf("Amount to Transfer: %d from %s\n",quantity,transferQuant[1]);
+    if (strncmp(transferQuant[1],"checkings",2)==0){
+        //Transfer from checkings to savings
+        sprintf(balanceBefore,"%d",savings); //stores the balance of savings before the transfer
         if (quantity<=checkings){
+            //Removes money from checkings and puts it into savings
             checkings -= quantity;
             savings+=quantity;
 	        printf("Checkings After: %d\n", checkings);
 	        printf("Savings After: %d\n", savings);
         }
         else{
+            //If savings amount > requested transfer, this creates an error code.
             strcpy(errorCode,"IB");
             printf("Insufficient Balance");
         }
-        sprintf(balanceAfter,"%d",savings);
+        sprintf(balanceAfter,"%d",savings); //stores the balance of savings after the transfer
     }
-    else if (strncmp(depositAmount[1],"savingstocheckings",2)==0){
-        sprintf(balanceBefore,"%d",checkings);
+    else if (strncmp(transferQuant[1],"savings",2)==0){
+        //Transfer from savings to checkings
+        sprintf(balanceBefore,"%d",checkings); //stores the balance of checkings before the transfer
         if (quantity<=savings){
+            //Removes money from savings and puts it into checkings
             checkings += quantity;
             savings-=quantity;
 	        printf("Checkings After: %d\n", checkings);
 	        printf("Savings After: %d\n", savings);
         }
         else{
+            //If savings amount > requested transfer, this creates an error code.
             strcpy(errorCode,"IB");
             printf("Insufficient Balance");
         }
-        sprintf(balanceBefore,"%d",checkings);
+        sprintf(balanceBefore,"%d",checkings); //stores the balance of checkings after the transfer
     }
 }
 
-void withdrawAmount(char depositAmount[3][20]){
-    int quantity = convertToInt(depositAmount[2]);
+void withdrawAmount(char depositAmount[3][13]){
+    /*Allows the server to take away an amount from the specified account*/
+    int quantity = convertToInt(depositAmount[2]); //Amount to withdraw
     printf("Amount to Withdraw: %d from %s\n",quantity,depositAmount[1]);
     if (strncmp(depositAmount[1],"checkings",2)==0){
-        sprintf(balanceBefore,"%d",checkings);
+        //This handles withdrawals from checkings
+        sprintf(balanceBefore,"%d",checkings); //Stores the balance of checkings before the withdrawal
         if (quantity>checkings){
+            //If the quantity being withdrawn is larger than the amount in checking, this error code is flagged
             strcpy(errorCode,"IB");
             printf("Insufficient Balance");
         }
         else if (quantity%20!=0){
+            //If the quantity being withdrawn is not a multiple of 20, then this error code is flagged.
             strcpy(errorCode,"MT");
             printf("Not a multiple of 20\n");
         }
         else{
-            // strcpy(balanceBefore,checkings);
+            //None of the error codes were flagged and the transaction succeeds.
             checkings-=quantity;
 	        printf("Checkings After: %d\n", checkings);
         }
-        sprintf(balanceAfter,"%d",checkings);
+        sprintf(balanceAfter,"%d",checkings);//Records the quantity of checkings after the withdrawal.
     }
     else if (strncmp(depositAmount[1],"savings",2)==0){
+        //You can only withdraw from checkings, so if savings is requested this error code is called.
         sprintf(balanceBefore,"%d",savings);
         strcpy(errorCode,"SA");
         printf("Please withdraw from checkings\n");
@@ -99,20 +111,21 @@ void withdrawAmount(char depositAmount[3][20]){
     }
 }
 
-void checkBalance(char depositAmount[3][20]){
-    if (strncmp(depositAmount[1],"checkings",2)==0){
+void checkBalance(char checkAmount[3][13]){
+    //This handles just checking the balance of the account that is called.
+    if (strncmp(checkAmount[1],"checkings",2)==0){ //When you are calling the balance of checking
         sprintf(balanceBefore,"%d",checkings);
         printf("Balance of checkings account: %d\n",checkings);
         sprintf(balanceAfter,"%d",checkings);
     }
-    else if (strncmp(depositAmount[1],"savings",2)==0){
+    else if (strncmp(checkAmount[1],"savings",2)==0){ //When you are calling the balance of savings.
             sprintf(balanceBefore,"%d",savings);
         printf("Balance of savings account: %d\n", savings);
             sprintf(balanceAfter,"%d",savings);
     }
 }
 
-void depositCheck(char depositAmount[3][20]){
+void depositCheck(char depositAmount[3][13]){
     /*
     This handles changing deposit amounts. It first calculates the int by calling convertToInt() then it adds this
     amount to either the checkings or the savings depending on the second portion of the string.
@@ -204,74 +217,71 @@ int main(void) {
       /* receive the message */
 
       bytes_recd = recv(sock_connection, sentence, STRING_SIZE, 0);
-      if (bytes_recd > 0){
-    //         char errorCode[1];
-    // char balanceBefore[7];
-    // char balanceAfter[7];
-    // char returnString[20];
-        strcpy(errorCode,"NA");
-        strcpy(balanceBefore,"");
-        strcpy(balanceAfter,"");
-        strcpy(returnString,"");
-         printf("Received Sentence is:\n");
-         printf("%s", sentence);
-         printf("\nwith length %d\n\n", bytes_recd);
-        //  printf("%c\n",sentence[0]);
-        char splitStrings[3][20]; //can store 10 words of 10 characters
-        int i;
-        int j;
-        int cnt;
-        // str = sentence;
-        j=0; 
-        cnt=0;
-        for(i=0;i<=(strlen(sentence));i++){
-            if(sentence[i]==' '||sentence[i]=='\0'){
-                splitStrings[cnt][j]='\0';
-                cnt++; 
-                j=0; 
+        if (bytes_recd > 0){
+            //Resets all the stored code
+            strcpy(errorCode,"NA");
+            strcpy(balanceBefore,"");
+            strcpy(balanceAfter,"");
+            strcpy(returnString,"");
+            //What the server received from the client
+            printf("Received Sentence is:\n");
+            printf("%s", sentence);
+            printf("\nwith length %d\n\n", bytes_recd);
+            //Convers what we received from the client into three split strings. If we have balance, it
+            //still has three sections, although the third is empty.
+            char splitStrings[3][13];
+            int i;
+            int j;
+            int cnt;
+            j=0; 
+            cnt=0;
+            for(i=0;i<=(strlen(sentence));i++){
+                if(sentence[i]==' '||sentence[i]=='\0'){
+                    splitStrings[cnt][j]='\0';
+                    cnt++; 
+                    j=0; 
+                }
+                else{
+                    splitStrings[cnt][j]=sentence[i];
+                    j++;
+                }
+            }
+            strcat(returnString,splitStrings[0]); //Keeps track of the transaction for the returnString
+            if (strncmp(splitStrings[0],"Balance",2)==0){
+                checkBalance(splitStrings);//Sends this off to the check balance function
+            }
+            else if (strncmp(splitStrings[0],"Deposit",2)==0){
+                depositCheck(splitStrings);//Sends this off to the deposit function
+            }
+            else if (strncmp(splitStrings[0],"Withdraw",2)==0){
+                withdrawAmount(splitStrings);//Sends this off to the withdraw function
+            }
+            else if (strncmp(splitStrings[0],"Transfer",2)==0){
+                transferAmount(splitStrings);//Sends this off to the transfer function
             }
             else{
-                splitStrings[cnt][j]=sentence[i];
-                j++;
+                printf("%s\n","Not an option buckaroo");
             }
-        }
-        strcat(returnString,splitStrings[0]);
-        if (strncmp(splitStrings[0],"Balance",2)==0){
-            checkBalance(splitStrings);
-        }
-        else if (strncmp(splitStrings[0],"Deposit",2)==0){
-            depositCheck(splitStrings);
-        }
-        else if (strncmp(splitStrings[0],"Withdraw",2)==0){
-            withdrawAmount(splitStrings);
-        }
-        else if (strncmp(splitStrings[0],"Transfer",2)==0){
-            transferAmount(splitStrings);
-        }
-        else{
-            printf("%s\n","Not an option buckaroo");
-        }
-        strcat(returnString," ");
-        strcat(returnString,errorCode);
-        strcat(returnString," ");
-        strcat(returnString,splitStrings[1]);
-        strcat(returnString," ");
-        strcat(returnString,balanceBefore);
-        strcat(returnString," ");
-        strcat(returnString,balanceAfter);
-        printf("hello");
-        printf("%s",returnString);
-        /* prepare the message to send */
-        // strcpy(returnString,"himynameisjenny");
-         msg_len = bytes_recd;
+            //These take all the information stored earlier that is necessary for the return string
+            strcat(returnString," ");//Spaces help to keep the message neat and more machine readable
+            strcat(returnString,errorCode);
+            strcat(returnString," ");
+            strcat(returnString,splitStrings[1]); //This is the account the transaction was on
+            strcat(returnString," ");
+            strcat(returnString,balanceBefore);
+            strcat(returnString," ");
+            strcat(returnString,balanceAfter);
+            printf("%s",returnString);
+            /* prepare the message to send */
+            msg_len = bytes_recd;
 
-         for (i=0; i<msg_len; i++)
-            modifiedSentence[i] = toupper (sentence[i]);
+            for (i=0; i<msg_len; i++)
+                modifiedSentence[i] = toupper (sentence[i]);
 
-         /* send message */
- 
-         bytes_sent = send(sock_connection, returnString, 20, 0);
-      }
+            /* send message */
+    
+            bytes_sent = send(sock_connection, returnString, 20, 0);
+        }
 
       /* close the socket */
 
