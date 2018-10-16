@@ -83,12 +83,19 @@ int main(void) {
    }
 
    /* user interface */
-   printf("Please input a Transaction:\n");
+   printf("Please input a Transaction (Balance, Withdraw, Deposit, Transfer):\n");
    scanf("%s", sentence);
    createString();
-   printf("Which account would you like to use?\n");
-   scanf("%s", sentence);
-    createString();
+   if (strncmp(storeString,"Transfer",2)!=0){
+        printf("Which account would you like to use?\n");
+        scanf("%s", sentence);
+        createString();
+   }
+   else{
+       printf("Transfer from savings or checkings (one word specification)?\n");
+       scanf("%s", sentence);
+       createString();
+   }
    if (strncmp(storeString,"Balance",2)!=0){
         printf("What amount would you like?\n");
         scanf("%s", sentence);
@@ -96,21 +103,74 @@ int main(void) {
         strcat(storeString," ");
         strcat(input,sentence);
    }
-   puts(input);
+//    puts(input);
    msg_len = 13;
    /* send message */
    
-   printf("%s\n",storeString);
+   printf("Sent to server: %s\n",input);
+   printf("Meaning: %s\n",storeString);
    bytes_sent = send(sock_client, input, msg_len, 0);
 
    /* get response from server */
   
    bytes_recd = recv(sock_client, modifiedSentence, STRING_SIZE, 0); 
+    char splitStrings[5][7]; //can store 10 words of 10 characters
+    printf("%s\n",modifiedSentence);
+    int i;
+    int j;
+    int cnt;
+    for(i=0;i<=(strlen(modifiedSentence));i++){
+        if(modifiedSentence[i]==' '||modifiedSentence[i]=='\0'){
+            splitStrings[cnt][j]='\0';
+            cnt++; 
+            j=0; 
+        }
+        else{
+            splitStrings[cnt][j]=modifiedSentence[i];
+            j++;
+        }
+    }
+    char finalString[100];
+    if (strncmp(splitStrings[0],"Balance",2)==0){
+        strcpy(finalString,"Transaction type = Balance\n");
+    }
+    else if (strncmp(splitStrings[0],"Deposit",2)==0){
+        strcpy(finalString,"Transaction type = Deposit\n");
+    }
+    else if (strncmp(splitStrings[0],"Withdraw",2)==0){
+        strcpy(finalString,"Transaction type = Withdraw\n");
+    }
+    else if (strncmp(splitStrings[0],"Transfer",2)==0){
+        strcpy(finalString,"Transaction type = Transfer\n");
+    }
+    if (strncmp(splitStrings[1],"NA",2)!=0){
+        if (strncmp(splitStrings[1],"IB",2)==0){
+            strcat(finalString,"Error Code: Insufficient Balance\n");
+        }
+        else if (strncmp(splitStrings[1],"MT",2)==0){
+            strcat(finalString,"Error Code: You can only withdraw multiples of 20\n");
+        }
+        else{
+            strcat(finalString,"Error Code: Please only withdraw from checkings\n");
+        }
+    }
+    if (strncmp(splitStrings[2],"checkings",2)==0){
+        strcat(finalString,"Transaction acted on checkings\n");
+    }
+    else if (strncmp(splitStrings[2],"savings",2)==0){
+        strcat(finalString,"Transaction acted on savings\n");
+    }
+    char balance[25] = "Account Balance Before: ";
+    strcat(balance,splitStrings[3]);
+    strcat(finalString,balance);
+    strcat(finalString,"\n");
+    char balancetwo[25] = "Account Balance After: ";
+    strcat(balancetwo,splitStrings[4]);
+    strcat(finalString,balancetwo);
+    printf("\nThe response from server is:\n");
+    printf("%s\n\n", finalString);
 
-   printf("\nThe response from server is:\n");
-   printf("%s\n\n", modifiedSentence);
+    /* close the socket */
 
-   /* close the socket */
-
-   close (sock_client);
+    close (sock_client);
 }

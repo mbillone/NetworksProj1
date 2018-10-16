@@ -18,8 +18,14 @@
 
 #define SERV_TCP_PORT 3636
 
-    int savings = 100;
-    int checkings = 100;
+int savings = 0;
+int checkings = 0;
+// int errorCode = -1;
+char errorCode[1];
+char balanceBefore[7];
+char balanceAfter[7];
+char returnString[24];
+
 int convertToInt(char num[20]){
     /*
     This converts any string of length 20 to an int.
@@ -31,10 +37,12 @@ int convertToInt(char num[20]){
 	}
 	return dec;
 }
+
 void transferAmount(char depositAmount[3][20]){
     int quantity = convertToInt(depositAmount[2]);
     printf("Amount to Transfer: %d from %s\n",quantity,depositAmount[1]);
     if (strncmp(depositAmount[1],"checkingstosavings",2)==0){
+            sprintf(balanceBefore,"%d",savings);
         if (quantity<=checkings){
             checkings -= quantity;
             savings+=quantity;
@@ -42,10 +50,13 @@ void transferAmount(char depositAmount[3][20]){
 	        printf("Savings After: %d\n", savings);
         }
         else{
-            printf("Insufficient Balance\n");
+            strcpy(errorCode,"IB");
+            printf("Insufficient Balance");
         }
+        sprintf(balanceAfter,"%d",savings);
     }
     else if (strncmp(depositAmount[1],"savingstocheckings",2)==0){
+        sprintf(balanceBefore,"%d",checkings);
         if (quantity<=savings){
             checkings += quantity;
             savings-=quantity;
@@ -53,8 +64,10 @@ void transferAmount(char depositAmount[3][20]){
 	        printf("Savings After: %d\n", savings);
         }
         else{
-            printf("Insufficient Balance\n");
+            strcpy(errorCode,"IB");
+            printf("Insufficient Balance");
         }
+        sprintf(balanceBefore,"%d",checkings);
     }
 }
 
@@ -62,28 +75,40 @@ void withdrawAmount(char depositAmount[3][20]){
     int quantity = convertToInt(depositAmount[2]);
     printf("Amount to Withdraw: %d from %s\n",quantity,depositAmount[1]);
     if (strncmp(depositAmount[1],"checkings",2)==0){
+        sprintf(balanceBefore,"%d",checkings);
         if (quantity>checkings){
-            printf("Insufficient Balance\n");
+            strcpy(errorCode,"IB");
+            printf("Insufficient Balance");
         }
         else if (quantity%20!=0){
+            strcpy(errorCode,"MT");
             printf("Not a multiple of 20\n");
         }
         else{
+            // strcpy(balanceBefore,checkings);
             checkings-=quantity;
 	        printf("Checkings After: %d\n", checkings);
         }
+        sprintf(balanceAfter,"%d",checkings);
     }
     else if (strncmp(depositAmount[1],"savings",2)==0){
+        sprintf(balanceBefore,"%d",savings);
+        strcpy(errorCode,"SA");
         printf("Please withdraw from checkings\n");
+        sprintf(balanceAfter,"%d",savings);
     }
 }
 
 void checkBalance(char depositAmount[3][20]){
     if (strncmp(depositAmount[1],"checkings",2)==0){
+        sprintf(balanceBefore,"%d",checkings);
         printf("Balance of checkings account: %d\n",checkings);
+        sprintf(balanceAfter,"%d",checkings);
     }
     else if (strncmp(depositAmount[1],"savings",2)==0){
+            sprintf(balanceBefore,"%d",savings);
         printf("Balance of savings account: %d\n", savings);
+            sprintf(balanceAfter,"%d",savings);
     }
 }
 
@@ -95,12 +120,16 @@ void depositCheck(char depositAmount[3][20]){
     int quantity = convertToInt(depositAmount[2]);
     printf("Amount Deposited: %d to %s\n",quantity,depositAmount[1]);
     if (strncmp(depositAmount[1],"checkings",2)==0){
+        sprintf(balanceBefore,"%d",checkings);
         checkings +=quantity;
 	    printf("Checkings After: %d\n", checkings);
+        sprintf(balanceAfter,"%d",checkings);
     }
     else if (strncmp(depositAmount[1],"savings",2)==0){
+            sprintf(balanceBefore,"%d",savings);
         savings += quantity;
 	    printf("Savings After: %d\n", savings);
+            sprintf(balanceAfter,"%d",savings);
     }
 }
 
@@ -176,6 +205,14 @@ int main(void) {
 
       bytes_recd = recv(sock_connection, sentence, STRING_SIZE, 0);
       if (bytes_recd > 0){
+    //         char errorCode[1];
+    // char balanceBefore[7];
+    // char balanceAfter[7];
+    // char returnString[20];
+        strcpy(errorCode,"NA");
+        strcpy(balanceBefore,"");
+        strcpy(balanceAfter,"");
+        strcpy(returnString,"");
          printf("Received Sentence is:\n");
          printf("%s", sentence);
          printf("\nwith length %d\n\n", bytes_recd);
@@ -198,6 +235,7 @@ int main(void) {
                 j++;
             }
         }
+        strcat(returnString,splitStrings[0]);
         if (strncmp(splitStrings[0],"Balance",2)==0){
             checkBalance(splitStrings);
         }
@@ -213,8 +251,18 @@ int main(void) {
         else{
             printf("%s\n","Not an option buckaroo");
         }
+        strcat(returnString," ");
+        strcat(returnString,errorCode);
+        strcat(returnString," ");
+        strcat(returnString,splitStrings[1]);
+        strcat(returnString," ");
+        strcat(returnString,balanceBefore);
+        strcat(returnString," ");
+        strcat(returnString,balanceAfter);
+        printf("hello");
+        printf("%s",returnString);
         /* prepare the message to send */
-
+        // strcpy(returnString,"himynameisjenny");
          msg_len = bytes_recd;
 
          for (i=0; i<msg_len; i++)
@@ -222,7 +270,7 @@ int main(void) {
 
          /* send message */
  
-         bytes_sent = send(sock_connection, modifiedSentence, msg_len, 0);
+         bytes_sent = send(sock_connection, returnString, 20, 0);
       }
 
       /* close the socket */
