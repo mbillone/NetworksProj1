@@ -33,56 +33,57 @@ int convertToInt(char num[20]){
 }
 void transferAmount(char depositAmount[3][20]){
     int quantity = convertToInt(depositAmount[2]);
-    printf("\nAmount to Transfer: %d from %s",quantity,depositAmount[1]);
+    printf("Amount to Transfer: %d from %s\n",quantity,depositAmount[1]);
     if (strncmp(depositAmount[1],"checkingstosavings",2)==0){
         if (quantity<=checkings){
             checkings -= quantity;
             savings+=quantity;
-	        printf("\nCheckings After: %d\n", checkings);
-	        printf("\nSavings After: %d\n", savings);
+	        printf("Checkings After: %d\n", checkings);
+	        printf("Savings After: %d\n", savings);
         }
         else{
-            printf("\nInsufficient Balance\n");
+            printf("Insufficient Balance\n");
         }
     }
     else if (strncmp(depositAmount[1],"savingstocheckings",2)==0){
         if (quantity<=savings){
             checkings += quantity;
             savings-=quantity;
-	        printf("\nCheckings After: %d\n", checkings);
-	        printf("\nSavings After: %d\n", savings);
+	        printf("Checkings After: %d\n", checkings);
+	        printf("Savings After: %d\n", savings);
         }
         else{
-            printf("\nInsufficient Balance\n");
+            printf("Insufficient Balance\n");
         }
     }
 }
 
 void withdrawAmount(char depositAmount[3][20]){
-    /*
-    */
     int quantity = convertToInt(depositAmount[2]);
-    printf("\nAmount to Withdraw: %d from %s",quantity,depositAmount[1]);
+    printf("Amount to Withdraw: %d from %s\n",quantity,depositAmount[1]);
     if (strncmp(depositAmount[1],"checkings",2)==0){
         if (quantity>checkings){
-            printf("\nInsufficient Balance\n");
+            printf("Insufficient Balance\n");
+        }
+        else if (quantity%20!=0){
+            printf("Not a multiple of 20\n");
         }
         else{
             checkings-=quantity;
-	        printf("\nCheckings After: %d\n", checkings);
+	        printf("Checkings After: %d\n", checkings);
         }
     }
     else if (strncmp(depositAmount[1],"savings",2)==0){
-        printf("\nPlease withdraw from checkings\n");
+        printf("Please withdraw from checkings\n");
     }
 }
 
 void checkBalance(char depositAmount[3][20]){
     if (strncmp(depositAmount[1],"checkings",2)==0){
-        printf("\nBalance of checkings account: %d",checkings);
+        printf("Balance of checkings account: %d\n",checkings);
     }
     else if (strncmp(depositAmount[1],"savings",2)==0){
-        printf("Balance of savings account: %d", savings);
+        printf("Balance of savings account: %d\n", savings);
     }
 }
 
@@ -92,14 +93,14 @@ void depositCheck(char depositAmount[3][20]){
     amount to either the checkings or the savings depending on the second portion of the string.
     */
     int quantity = convertToInt(depositAmount[2]);
-    printf("\nAmount Deposited: %d to %s",quantity,depositAmount[1]);
+    printf("Amount Deposited: %d to %s\n",quantity,depositAmount[1]);
     if (strncmp(depositAmount[1],"checkings",2)==0){
         checkings +=quantity;
-	    printf("\nCheckings After: %d\n", checkings);
+	    printf("Checkings After: %d\n", checkings);
     }
     else if (strncmp(depositAmount[1],"savings",2)==0){
         savings += quantity;
-	    printf("\nSavings After: %d\n", savings);
+	    printf("Savings After: %d\n", savings);
     }
 }
 
@@ -187,7 +188,7 @@ int main(void) {
         j=0; 
         cnt=0;
         for(i=0;i<=(strlen(sentence));i++){
-            if(sentence[i]=='_'||sentence[i]=='\0'){
+            if(sentence[i]==' '||sentence[i]=='\0'){
                 splitStrings[cnt][j]='\0';
                 cnt++; 
                 j=0; 

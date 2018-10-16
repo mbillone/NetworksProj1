@@ -12,6 +12,18 @@
 
 #define STRING_SIZE 1024
 
+char input[13];
+char testing[2];
+char storeString[30];
+char sentence[STRING_SIZE];
+void createString(){
+    strncpy(testing, sentence, 2);
+    strcat(storeString,sentence);
+    strcat(storeString," ");
+    strcat(input,testing);
+    strcat(input," ");
+}
+
 int main(void) {
 
    int sock_client;  /* Socket used by client */
@@ -23,7 +35,7 @@ int main(void) {
    char server_hostname[STRING_SIZE]; /* Server's hostname */
    unsigned short server_port;  /* Port number used by server (remote port) */
 
-   char sentence[STRING_SIZE];  /* send message */
+//    char sentence[STRING_SIZE];  /* send message */
    char modifiedSentence[STRING_SIZE]; /* receive message */
    unsigned int msg_len;  /* length of message */                      
    int bytes_sent, bytes_recd; /* number of bytes sent or received */
@@ -71,15 +83,25 @@ int main(void) {
    }
 
    /* user interface */
-
-   printf("Please input a sentence:\n");
+   printf("Please input a Transaction:\n");
    scanf("%s", sentence);
-   printf("%s",sentence);
-   msg_len = strlen(sentence) + 1;
-
+   createString();
+   printf("Which account would you like to use?\n");
+   scanf("%s", sentence);
+    createString();
+   if (strncmp(storeString,"Balance",2)!=0){
+        printf("What amount would you like?\n");
+        scanf("%s", sentence);
+        strcat(storeString,sentence);
+        strcat(storeString," ");
+        strcat(input,sentence);
+   }
+   puts(input);
+   msg_len = 13;
    /* send message */
    
-   bytes_sent = send(sock_client, sentence, msg_len, 0);
+   printf("%s\n",storeString);
+   bytes_sent = send(sock_client, input, msg_len, 0);
 
    /* get response from server */
   
