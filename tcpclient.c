@@ -189,10 +189,20 @@ int main(void) {
     }
     //This states whether the transaction was performed on checkings or savings.
     if (strncmp(splitStrings[2],"checkings",2)==0){
-        strcat(finalString,"Transaction acted on checkings\n");
+        if (strncmp(splitStrings[0],"Transfer",2)==0){
+            strcat(finalString,"Transaction acted on savings\n");
+        }
+        else{
+            strcat(finalString,"Transaction acted on checkings\n");
+        }
     }
     else if (strncmp(splitStrings[2],"savings",2)==0){
-        strcat(finalString,"Transaction acted on savings\n");
+        if (strncmp(splitStrings[0],"Transfer",2)==0){
+            strcat(finalString,"Transaction acted on checkings\n");
+        }
+        else{
+            strcat(finalString,"Transaction acted on savings\n");
+        }
     }
     //The next bit handles adding the balance before and the balance after to the final string.
     //It does this by concatinating the first portion of the sentence with the balance, then
