@@ -45,6 +45,7 @@ int main(void) {
    char modifiedSentence[STRING_SIZE]; /* receive message */
    unsigned int msg_len;  /* length of message */                      
    int bytes_sent, bytes_recd; /* number of bytes sent or received */
+   while(keepOpen){
    /* open a socket */
 
    if ((sock_client = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
@@ -87,12 +88,16 @@ int main(void) {
       close(sock_client);
       exit(1);
    }
-
+    
+    while(keepConnected){
    /* user interface */
    /* We did this in three questions. The first question, please answer one of the four indicated
    transactions. In the second one, please specify savings for savings to checkings transfer, or
    vice versa. The last question will show up for everything but balance, and handles the amount
    to be utilized in the transaction*/
+   
+   strcpy(storeString,"");
+   strcpy(input,"");
    printf("Please input a Transaction (Balance, Withdraw, Deposit, Transfer):\n");
    scanf("%s", sentence);
    createString();
@@ -202,8 +207,28 @@ int main(void) {
     printf("\nThe Transaction Summary:\n");
     printf("%s\n\n", finalString);
     
+    printf("Would You Like to Enter Another Command? (Y/N - Needs to be capital letter): ");
+    scanf("%s", userResponse);
 
+    if (strcmp(userResponse, "N") == 0){
+        keepConnected = 0;
+    }
+    
+    }
     /* close the socket */
 
     close (sock_client);
+    printf("Would you like to connect again? (Y/N - Capital Letter Please): ");
+    scanf("%s", closeProgram);
+    if (strcmp(closeProgram, "N") == 0){
+        keepOpen = 0;
+        exit(1);
+    }
+    else if (strcmp(closeProgram, "Y") == 0){
+        keepConnected = 1;
+    }
+    else{
+        printf("Please type Y or N capitalized");
+    }
+   }
 }

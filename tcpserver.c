@@ -16,8 +16,9 @@
    incoming requests from clients. You should change this to a different
    number to prevent conflicts with others in the class. */
 
-#define SERV_TCP_PORT 3638
+#define SERV_TCP_PORT 3636
 
+int count;
 int savings = 0; //Total amount in savings at current moment
 int checkings = 0; //Total amount in checkings at current moment
 // int errorCode = -1;
@@ -164,7 +165,7 @@ int main(void) {
    unsigned int msg_len;  /* length of message */
    int bytes_sent, bytes_recd; /* number of bytes sent or received */
    unsigned int i;  /* temporary loop variable */
-
+   
    /* open a socket */
    if ((sock_server = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
       perror("Server: can't open stream socket");
@@ -189,6 +190,7 @@ int main(void) {
       exit(1);
    }                     
 
+    
    /* listen for incoming requests from clients */
 
    if (listen(sock_server, 50) < 0) {    /* 50 is the max number of pending */
@@ -196,13 +198,14 @@ int main(void) {
       close(sock_server);
       exit(1);
    }
-   printf("I am here to listen ... on port %hu\n\n", server_port);
+   printf("\n I am here to listen ... on port %hu\n\n", server_port);
   
    client_addr_len = sizeof (client_addr);
-
+   
+   for (;;) {
    /* wait for incoming connection requests in an indefinite loop */
 
-   for (;;) {
+   
 
       sock_connection = accept(sock_server, (struct sockaddr *) &client_addr, 
                                          &client_addr_len);
@@ -213,7 +216,8 @@ int main(void) {
          close(sock_server);
          exit(1);
       }
- 
+      
+      for(count = 0; count < 5;count++){
       /* receive the message */
 
       bytes_recd = recv(sock_connection, sentence, STRING_SIZE, 0);
@@ -282,6 +286,7 @@ int main(void) {
     
             bytes_sent = send(sock_connection, returnString, 20, 0);
         }
+      }
 
       /* close the socket */
 
