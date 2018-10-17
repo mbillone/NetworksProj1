@@ -16,7 +16,7 @@
    incoming requests from clients. You should change this to a different
    number to prevent conflicts with others in the class. */
 
-#define SERV_TCP_PORT 3636
+#define SERV_TCP_PORT 3638
 
 int savings = 0; //Total amount in savings at current moment
 int checkings = 0; //Total amount in checkings at current moment

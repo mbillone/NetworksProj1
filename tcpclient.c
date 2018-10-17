@@ -27,6 +27,11 @@ void createString(){
 
 int main(void) {
 
+   int keepOpen = 1; /* keeps client program open until user decides to close out client*/
+   int keepConnected = 1; /* keeps client connected to server until user decides to disconnect from server*/
+   char userResponse[1]; /* input from user to keep client connected to server or disconnect from server*/
+   char closeProgram[1]; /* input from user to keep client program running or to close it*/
+
    int sock_client;  /* Socket used by client */
 
    struct sockaddr_in server_addr;  /* Internet address structure that
@@ -128,20 +133,28 @@ int main(void) {
     //This handles breaking the returned sentence into a string of multiple commands, which will
     //later be translated for user readability.
     char splitStrings[5][7];
-    int i;
+    char s[2] = " ";
+    char *token;
+    int i=0;
     int j;
     int cnt;
-    for(i=0;i<=(strlen(modifiedSentence));i++){
-        if(modifiedSentence[i]==' '||modifiedSentence[i]=='\0'){
-            splitStrings[cnt][j]='\0';
-            cnt++; 
-            j=0; 
-        }
-        else{
-            splitStrings[cnt][j]=modifiedSentence[i];
-            j++;
-        }
-    }
+    token = strtok(modifiedSentence,s);
+    while( token != NULL ) {
+      strcpy(splitStrings[i],token);
+      i+=1;
+      token = strtok(NULL, s);
+   }
+    // for(i=0;i<=(strlen(modifiedSentence));i++){
+    //     if(modifiedSentence[i]==' '||modifiedSentence[i]=='\0'){
+    //         splitStrings[cnt][j]='\0';
+    //         cnt++; 
+    //         j=0; 
+    //     }
+    //     else{
+    //         splitStrings[cnt][j]=modifiedSentence[i];
+    //         j++;
+    //     }
+    // }
     char finalString[100];
     //States the transaction type (Balance, Deposit, Withdraw, Transfer)
     if (strncmp(splitStrings[0],"Balance",2)==0){
@@ -188,6 +201,7 @@ int main(void) {
     strcat(finalString,balancetwo);
     printf("\nThe Transaction Summary:\n");
     printf("%s\n\n", finalString);
+    
 
     /* close the socket */
 
